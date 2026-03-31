@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Happy Birthday 🌸</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@400;600;800&family=Zen+Maru+Gothic:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<!-- ============================================== -->
+<!-- STYLES                                         -->
+<!-- ============================================== -->
+<style>
+
+/* ---------- VARIABLES ---------- */
+:root {
+  --navy: #1a1f3a;
+  --gold: #c9a84c;
+  --gold-light: #e8d48b;
+  --cream: #f5f0e8;
+  --sakura: #f4b4c6;
+  --sakura-deep: #e88fa7;
+  --sakura-light: #fce4ec;
+}
+
+/* ---------- RESET ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  overflow: hidden; height: 100dvh; width: 100vw;
+  touch-action: none; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
+}
+body { font-family: 'Zen Maru Gothic', sans-serif; background: var(--navy); }
+
+/* ---------- SCREEN TRANSITIONS ---------- */
+.screen {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 10; transition: opacity 0.8s ease, transform 0.8s ease;
+}
+.screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.95); }
+
+/* ---------- WELCOME SCREEN ---------- */
+#welcome {
+  background-color: var(--cream);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 40a40 40 0 0 1 40-40 40 40 0 0 1 40 40' fill='none' stroke='%23c9a84c' stroke-width='0.4' opacity='0.3'/%3E%3Cpath d='M0 40a30 30 0 0 1 30-30 30 30 0 0 1 30 30' fill='none' stroke='%23c9a84c' stroke-width='0.4' opacity='0.2' transform='translate(10,0)'/%3E%3Cpath d='M0 40a20 20 0 0 1 20-20 20 20 0 0 1 20 20' fill='none' stroke='%23c9a84c' stroke-width='0.4' opacity='0.15' transform='translate(20,0)'/%3E%3C/svg%3E");
+  gap: 24px;
+}
+.welcome-kanji {
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: clamp(16px, 4vw, 24px); color: var(--gold); letter-spacing: 6px;
+  opacity: 0; animation: fadeUp 1s 0.3s forwards;
+}
+.welcome-title {
+  font-family: 'Shippori Mincho B1', serif;
+  font-size: clamp(36px, 10vw, 64px); font-weight: 800;
+  text-align: center; line-height: 1.15;
+  opacity: 0; animation: fadeUp 1s 0.6s forwards;
+}
+.welcome-title span {
+  display: block;
+  background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.welcome-sub {
+  font-size: clamp(14px, 3.5vw, 18px); color: var(--navy);
+  text-align: center; line-height: 1.6;
+  opacity: 0; animation: fadeUp 1s 0.9s forwards;
+}
+.start-btn {
+  margin-top: 8px; padding: 16px 48px;
+  background: var(--navy); color: var(--gold);
+  border: 2px solid var(--gold); border-radius: 50px;
+  font-family: 'Shippori Mincho B1', serif; font-size: clamp(16px, 4vw, 20px);
+  cursor: pointer; letter-spacing: 2px; transition: all 0.3s;
+  opacity: 0; animation: fadeUp 1s 1.2s forwards;
+}
+.start-btn:active { transform: scale(0.95); background: var(--gold); color: var(--navy); }
+
+/* ---------- GAME SCREEN ---------- */
+#game-screen { background: #0d0a20; overflow: hidden; }
+canvas { position: fixed; inset: 0; z-index: 1; }
+
+/* ---------- GAME HUD ---------- */
+.game-hud {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding: 12px 20px; display: flex; justify-content: center; align-items: center; gap: 20px;
+  z-index: 20; background: rgba(26,31,58,0.7); backdrop-filter: blur(6px);
+}
+.hud-item { text-align: center; }
+.hud-label { font-family: 'Shippori Mincho B1', serif; font-size: 11px; color: var(--gold-light); letter-spacing: 1px; text-transform: uppercase; }
+.hud-value { font-family: 'Shippori Mincho B1', serif; font-size: 18px; font-weight: 800; color: var(--gold); }
+.hud-divider { width: 1px; height: 30px; background: rgba(201,168,76,0.3); }
+
+/* ---------- MOBILE CONTROLS ---------- */
+.mobile-controls {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: space-between; padding: 0 16px 24px;
+  z-index: 20; pointer-events: none;
+}
+.ctrl-btn {
+  pointer-events: all; width: 72px; height: 72px; border-radius: 50%;
+  background: rgba(26,31,58,0.6); border: 2px solid rgba(201,168,76,0.4);
+  backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent; transition: transform 0.1s;
+}
+.ctrl-btn:active { transform: scale(0.9); background: rgba(201,168,76,0.3); }
+.ctrl-btn svg { width: 32px; height: 32px; }
+
+/* ---------- MUSIC BUTTON ---------- */
+.music-btn {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 25; padding: 8px 16px; border-radius: 20px;
+  background: rgba(26,31,58,0.7); border: 1px solid rgba(201,168,76,0.3);
+  backdrop-filter: blur(6px); color: var(--gold-light);
+  font-family: 'Zen Maru Gothic', sans-serif; font-size: 12px;
+  cursor: pointer; display: none; transition: opacity 0.3s;
+}
+
+/* ---------- ARRIVAL SCREEN ---------- */
+#arrival-screen {
+  background: linear-gradient(180deg, #0d0a20 0%, #2d1b69 30%, #e8a87c 70%, #f0c49f 100%);
+  gap: 20px;
+}
+.arrival-lanterns {
+  position: fixed; top: 0; left: 0; right: 0; height: 120px;
+  display: flex; justify-content: center; gap: 40px; z-index: 0;
+}
+.lantern {
+  width: 30px; height: 50px; background: #d94040;
+  border-radius: 50% / 40%; position: relative; margin-top: 20px;
+  box-shadow: 0 0 20px rgba(217,64,64,0.5), 0 0 40px rgba(217,64,64,0.2);
+  animation: lanternSway 3s ease-in-out infinite;
+}
+.lantern::before { content: ''; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); width: 2px; height: 12px; background: #666; }
+.lantern::after { content: '福'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--gold); font-family: 'Shippori Mincho B1', serif; }
+.lantern:nth-child(2) { animation-delay: 0.5s; margin-top: 30px; }
+.lantern:nth-child(3) { animation-delay: 1s; }
+.lantern:nth-child(4) { animation-delay: 0.3s; margin-top: 25px; }
+.arrival-text { position: relative; z-index: 5; text-align: center; opacity: 0; animation: fadeUp 1s 0.3s forwards; }
+.arrival-emoji { font-size: 60px; margin-bottom: 16px; }
+.arrival-title { font-family: 'Shippori Mincho B1', serif; font-size: clamp(24px,7vw,40px); font-weight: 800; color: var(--gold); line-height: 1.3; text-shadow: 0 2px 20px rgba(0,0,0,0.3); }
+.arrival-sub { font-size: clamp(14px,3.5vw,18px); color: var(--cream); margin-top: 12px; line-height: 1.5; opacity: 0.8; }
+.arrival-btn {
+  margin-top: 24px; padding: 16px 40px; background: #d94040; color: var(--cream);
+  border: none; border-radius: 50px; font-family: 'Shippori Mincho B1', serif;
+  font-size: clamp(16px,4vw,20px); cursor: pointer; letter-spacing: 2px;
+  box-shadow: 0 4px 20px rgba(217,64,64,0.4);
+  opacity: 0; animation: fadeUp 1s 0.8s forwards; transition: transform 0.2s;
+}
+.arrival-btn:active { transform: scale(0.95); }
+
+/* ---------- REVEAL / VOUCHER SCREEN ---------- */
+#reveal-screen { background: var(--navy); gap: 0; }
+.reveal-particles { position: fixed; inset: 0; z-index: 0; overflow: hidden; }
+.reveal-particle { position: absolute; width: 6px; height: 6px; background: var(--gold); border-radius: 50%; animation: floatParticle 3s infinite ease-in-out; }
+
+.voucher-card {
+  position: relative; z-index: 5; width: min(88vw, 400px); background: var(--cream);
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.3);
+  opacity: 0; transform: translateY(40px) scale(0.9);
+  animation: cardReveal 1s 0.3s forwards cubic-bezier(0.16,1,0.3,1);
+}
+.voucher-top { background: var(--navy); padding: 28px 24px 20px; text-align: center; position: relative; overflow: hidden; }
+.voucher-top::after { content: ''; position: absolute; bottom: -10px; left: 0; right: 0; height: 20px; background: var(--cream); border-radius: 50% 50% 0 0; }
+.voucher-congrats { font-family: 'Shippori Mincho B1', serif; font-size: 14px; color: var(--gold-light); letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+.voucher-gift-title { font-family: 'Shippori Mincho B1', serif; font-size: clamp(22px,6vw,32px); font-weight: 800; background: linear-gradient(135deg, var(--gold), var(--gold-light)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; line-height: 1.3; }
+.voucher-divider { display: flex; align-items: center; gap: 12px; padding: 0 24px; margin: 20px 0 4px; }
+.voucher-divider::before, .voucher-divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+.voucher-body { padding: 20px 28px 28px; text-align: center; }
+.voucher-gift-name { font-family: 'Shippori Mincho B1', serif; font-size: clamp(18px,5vw,24px); font-weight: 600; color: var(--navy); margin-bottom: 12px; line-height: 1.3; }
+.voucher-message { font-size: clamp(13px,3.2vw,15px); color: #5a5a6e; line-height: 1.7; margin-bottom: 20px; }
+.voucher-perforated { display: flex; align-items: center; justify-content: center; gap: 4px; margin: 16px -28px; }
+.voucher-perforated span { width: 6px; height: 1px; background: rgba(26,31,58,0.15); border-radius: 1px; }
+.voucher-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 4px; }
+.voucher-footer-label { font-size: 11px; color: #999; letter-spacing: 1px; text-transform: uppercase; }
+.voucher-footer-value { font-family: 'Shippori Mincho B1', serif; font-size: 14px; color: var(--navy); font-weight: 600; }
+.voucher-stamp {
+  margin-top: 20px; display: inline-block;
+  border: 2px solid var(--sakura-deep); color: var(--sakura-deep);
+  font-family: 'Shippori Mincho B1', serif; font-size: 13px; font-weight: 600;
+  padding: 6px 20px; border-radius: 4px; letter-spacing: 2px;
+  transform: rotate(-3deg); opacity: 0;
+  animation: stampIn 0.5s 1.2s forwards cubic-bezier(0.34,1.56,0.64,1);
+}
+.reveal-msg-bottom {
+  position: relative; z-index: 5; margin-top: 28px;
+  font-family: 'Shippori Mincho B1', serif; font-size: clamp(14px,3.5vw,17px);
+  color: var(--gold-light); text-align: center; letter-spacing: 1px;
+  opacity: 0; animation: fadeUp 1s 1.5s forwards;
+}
+
+/* ---------- ANIMATIONS ---------- */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cardReveal { to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes stampIn { 0% { opacity: 0; transform: rotate(-3deg) scale(2.5); } 100% { opacity: 1; transform: rotate(-3deg) scale(1); } }
+@keyframes floatParticle { 0%,100% { opacity: 0.2; transform: translateY(0); } 50% { opacity: 0.8; transform: translateY(-30px); } }
+@keyframes lanternSway { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================== -->
+<!-- HTML: WELCOME SCREEN                           -->
+<!-- ============================================== -->
+<div class="screen" id="welcome">
+  <div class="welcome-kanji">お誕生日おめでとう</div>
+  <div class="welcome-title"><span>Happy Birthday<br>Babesy!</span></div>
+  <div class="welcome-sub">Hop on, we're going<br>somewhere special tonight 🛵</div>
+  <button class="start-btn" id="startBtn">Let's Ride</button>
+</div>
+
+<!-- ============================================== -->
+<!-- HTML: GAME SCREEN                              -->
+<!-- ============================================== -->
+<div class="screen hidden" id="game-screen">
+  <canvas id="gameCanvas"></canvas>
+  <div class="game-hud">
+    <div class="hud-item"><div class="hud-label">Distance</div><div class="hud-value" id="hud-dist">0m</div></div>
+    <div class="hud-divider"></div>
+    <div class="hud-item"><div class="hud-label">Sakura</div><div class="hud-value" id="hud-sakura">0</div></div>
+    <div class="hud-divider"></div>
+    <div class="hud-item"><div class="hud-label">Speed</div><div class="hud-value" id="hud-speed">🛵</div></div>
+  </div>
+  <div class="mobile-controls">
+    <div class="ctrl-btn" id="btn-left"><svg viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="ctrl-btn" id="btn-right"><svg viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  </div>
+  <button class="music-btn" id="musicBtn">🔇 Tap for Music</button>
+</div>
+
+<!-- ============================================== -->
+<!-- HTML: ARRIVAL SCREEN                           -->
+<!-- ============================================== -->
+<div class="screen hidden" id="arrival-screen">
+  <div class="arrival-lanterns">
+    <div class="lantern"></div><div class="lantern"></div>
+    <div class="lantern"></div><div class="lantern"></div>
+  </div>
+  <div class="arrival-text">
+    <div class="arrival-emoji">🏮</div>
+    <div class="arrival-title">You Made It!</div>
+    <div class="arrival-sub">Welcome to the night market.<br>I have a little surprise for you...</div>
+    <button class="arrival-btn" id="revealBtn">Open Your Gift 🎁</button>
+  </div>
+</div>
+
+<!-- ============================================== -->
+<!-- HTML: GIFT REVEAL / VOUCHER SCREEN             -->
+<!-- ============================================== -->
+<div class="screen hidden" id="reveal-screen">
+  <div class="reveal-particles" id="particles"></div>
+  <div class="voucher-card">
+    <div class="voucher-top">
+      <div class="voucher-congrats">🌸 You Won a Gift 🌸</div>
+      <div class="voucher-gift-title">Eyelash Perm</div>
+    </div>
+    <div class="voucher-body">
+      <div class="voucher-divider"><span style="font-size:18px">✿</span></div>
+      <div class="voucher-gift-name">Your Choice, On Me 💕</div>
+      <div class="voucher-message">
+        Hope you enjoy our dinner at La Rebelle tonight! And because you deserve to feel as beautiful on the outside as you are on the inside — here's a little extra. Happy Birthday my love!
+      </div>
+      <div class="voucher-perforated" id="perf"></div>
+      <div class="voucher-footer">
+        <div><div class="voucher-footer-label">Valid Until</div><div class="voucher-footer-value">1st April 2027</div></div>
+        <div style="text-align:right"><div class="voucher-footer-label">For</div><div class="voucher-footer-value">Steph ♡</div></div>
+      </div>
+      <div class="voucher-stamp">REDEEMABLE</div>
+    </div>
+  </div>
+  <div class="reveal-msg-bottom">From Ming, with love 💛</div>
+</div>
+
+
+<script>
+/* ================================================
+   INIT & EVENT LISTENERS
+   ================================================ */
+const perf = document.getElementById('perf');
+for (let i = 0; i < 40; i++) perf.appendChild(document.createElement('span'));
+document.getElementById('startBtn').addEventListener('click', startGame);
+document.getElementById('revealBtn').addEventListener('click', showReveal);
+
+
+/* ================================================
+   MUSIC — iPhone-compatible Web Audio API
+   ================================================
+   iOS Safari requires AudioContext to be created
+   AND resumed inside a user gesture (touch/click).
+   We create it on the "Let's Ride" tap, then the
+   music button toggles it on/off.
+   ================================================ */
+let musicPlaying = false;
+let audioCtx = null;
+let gainNode = null;
+
+// Create AudioContext on first user gesture (iPhone requirement)
+function ensureAudioCtx() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  gainNode = audioCtx.createGain();
+  gainNode.gain.value = 0;
+  gainNode.connect(audioCtx.destination);
+  // iOS needs an explicit resume inside a gesture
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
+// Pentatonic melody — gentle Japanese ambient
+function playMelody() {
+  if (!musicPlaying || !audioCtx) return;
+  const notes = [261.6, 293.7, 349.2, 392.0, 523.3, 587.3, 698.5, 784.0];
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = notes[Math.floor(Math.random() * notes.length)] * (Math.random() > 0.6 ? 0.5 : 1);
+  g.gain.setValueAtTime(0, audioCtx.currentTime);
+  g.gain.linearRampToValueAtTime(0.07, audioCtx.currentTime + 0.08);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 2.5);
+  osc.connect(g);
+  g.connect(gainNode);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 2.5);
+  setTimeout(playMelody, 600 + Math.random() * 1400);
+}
+
+// Soft triangle-wave pad
+function playPad() {
+  if (!musicPlaying || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = 'triangle';
+  osc.frequency.value = [130.8, 146.8, 174.6][Math.floor(Math.random() * 3)];
+  g.gain.setValueAtTime(0, audioCtx.currentTime);
+  g.gain.linearRampToValueAtTime(0.03, audioCtx.currentTime + 1);
+  g.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 5);
+  osc.connect(g);
+  g.connect(gainNode);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 5);
+  setTimeout(playPad, 4500 + Math.random() * 1500);
+}
+
+// Toggle music on/off
+document.getElementById('musicBtn').addEventListener('click', function(e) {
+  e.stopPropagation();
+  ensureAudioCtx();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (!musicPlaying) {
+    musicPlaying = true;
+    gainNode.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.3);
+    playMelody();
+    playPad();
+    this.textContent = '🔊 Music On';
+  } else {
+    musicPlaying = false;
+    gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3);
+    this.textContent = '🔇 Music Off';
+  }
+});
+
+
+/* ================================================
+   CANVAS SETUP
+   ================================================ */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W, H, dpr;
+
+function resize() {
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+
+
+/* ================================================
+   GAME STATE
+   ================================================ */
+let gameRunning = false;
+let distance = 0;
+let sakuraCount = 0;
+let scooterX = 0.5;     // 0–1 normalized position
+let targetX = 0.5;
+let speed = 3;
+let roadOffset = 0;
+let buildings = [];
+let sakuras = [];
+let stars = [];
+let fx = [];             // collection particle effects
+let temples = [];
+let gameStartTime = 0;
+const RIDE_DISTANCE = 800;  // <-- total ride distance in metres
+
+
+/* ================================================
+   CONTROLS — Touch, Mouse, Keyboard, Tilt
+   ================================================ */
+let moveLeft = false, moveRight = false;
+
+// Touch buttons
+const btnL = document.getElementById('btn-left');
+const btnR = document.getElementById('btn-right');
+btnL.addEventListener('touchstart', e => { e.preventDefault(); moveLeft = true; }, { passive: false });
+btnL.addEventListener('touchend',   e => { e.preventDefault(); moveLeft = false; }, { passive: false });
+btnL.addEventListener('mousedown', () => moveLeft = true);
+btnL.addEventListener('mouseup',   () => moveLeft = false);
+btnR.addEventListener('touchstart', e => { e.preventDefault(); moveRight = true; }, { passive: false });
+btnR.addEventListener('touchend',   e => { e.preventDefault(); moveRight = false; }, { passive: false });
+btnR.addEventListener('mousedown', () => moveRight = true);
+btnR.addEventListener('mouseup',   () => moveRight = false);
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a') moveLeft = true;
+  if (e.key === 'ArrowRight' || e.key === 'd') moveRight = true;
+});
+document.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a') moveLeft = false;
+  if (e.key === 'ArrowRight' || e.key === 'd') moveRight = false;
+});
+
+// Device tilt (mobile gyroscope)
+let tiltEnabled = false;
+function handleOrientation(e) {
+  if (!gameRunning || !tiltEnabled) return;
+  const g = e.gamma || 0;
+  if (g < -8) { moveLeft = true; moveRight = false; }
+  else if (g > 8) { moveRight = true; moveLeft = false; }
+  else { moveLeft = false; moveRight = false; }
+}
+
+
+/* ================================================
+   SCENE INIT — Buildings, Stars, Temples
+   ================================================ */
+function initScene() {
+  // Japanese-style buildings on left and right
+  buildings = [];
+  for (let i = 0; i < 16; i++) {
+    buildings.push({
+      x: Math.random(),
+      w: 30 + Math.random() * 50,
+      h: 80 + Math.random() * 120,
+      color: `hsl(${220 + Math.random() * 30}, ${20 + Math.random() * 15}%, ${15 + Math.random() * 15}%)`,
+      windows: Math.floor(2 + Math.random() * 4),
+      side: Math.random() > 0.5 ? 'left' : 'right',
+      hasSign: Math.random() > 0.5,
+      signColor: ['#d94040', '#ff6b9d', '#64d8ff', '#c9a84c'][Math.floor(Math.random() * 4)],
+      signText: ['居酒屋', 'ラーメン', '焼鳥', '寿司', '天ぷら', 'うどん', 'たこ焼き', '抹茶'][Math.floor(Math.random() * 8)]
+    });
+  }
+
+  // Background stars
+  stars = [];
+  for (let i = 0; i < 60; i++) {
+    stars.push({
+      x: Math.random() * W,
+      y: Math.random() * H * 0.35,
+      size: 0.5 + Math.random() * 1.5,
+      tw: Math.random() * Math.PI * 2
+    });
+  }
+
+  // Kyoto temple silhouettes (pagodas + torii gates)
+  temples = [
+    { x: 0.08, type: 'pagoda', h: 100, layers: 5 },
+    { x: 0.25, type: 'gate',   h: 55 },
+    { x: 0.50, type: 'pagoda', h: 130, layers: 5 },
+    { x: 0.70, type: 'gate',   h: 50 },
+    { x: 0.88, type: 'pagoda', h: 80,  layers: 3 },
+  ];
+}
+
+
+/* ================================================
+   SAKURA COLLECTION EFFECTS (particle burst)
+   ================================================ */
+function spawnCollectFX(x, y) {
+  const colors = ['#f4b4c6', '#fce4ec', '#e88fa7', '#c9a84c', '#e8d48b', '#fff'];
+
+  // Burst particles (petals + circles)
+  for (let i = 0; i < 14; i++) {
+    const angle = (Math.PI * 2 / 14) * i + Math.random() * 0.5;
+    const spd = 2 + Math.random() * 5;
+    fx.push({
+      x, y,
+      vx: Math.cos(angle) * spd,
+      vy: Math.sin(angle) * spd - 3,
+      life: 1, decay: 0.018 + Math.random() * 0.015,
+      size: 3 + Math.random() * 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      type: Math.random() > 0.4 ? 'petal' : 'circle'
+    });
+  }
+
+  // Expanding ring
+  fx.push({ x, y, vx: 0, vy: 0, life: 1, decay: 0.03, size: 10, color: '#f4b4c6', type: 'ring' });
+
+  // Floating "+1 🌸" text
+  fx.push({ x, y: y - 10, vx: 0, vy: -1.8, life: 1, decay: 0.012, size: 0, color: '#c9a84c', type: 'text', text: '+1 🌸' });
+}
+
+function drawFX() {
+  fx.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    if (p.type !== 'ring' && p.type !== 'text') p.vy += 0.12; // gravity
+    p.life -= p.decay;
+    if (p.life <= 0) return;
+
+    ctx.save();
+    ctx.globalAlpha = p.life;
+
+    if (p.type === 'text') {
+      ctx.font = "bold 16px 'Shippori Mincho B1', serif";
+      ctx.fillStyle = p.color;
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 4;
+      ctx.fillText(p.text, p.x, p.y);
+    } else if (p.type === 'ring') {
+      const r = p.size + (1 - p.life) * 50;
+      ctx.strokeStyle = p.color;
+      ctx.lineWidth = 2 * p.life;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.stroke();
+    } else if (p.type === 'petal') {
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.life * 8);
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.moveTo(0, -p.size / 2);
+      ctx.bezierCurveTo(p.size / 2, -p.size / 2, p.size / 2, p.size / 4, 0, p.size / 2);
+      ctx.bezierCurveTo(-p.size / 2, p.size / 4, -p.size / 2, -p.size / 2, 0, -p.size / 2);
+      ctx.fill();
+    } else {
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.restore();
+  });
+  fx = fx.filter(p => p.life > 0);
+}
+
+
+/* ================================================
+   DRAW: SKY (gradient + stars + moon)
+   ================================================ */
+function drawSky(t) {
+  const progress = distance / RIDE_DISTANCE;
+  const grad = ctx.createLinearGradient(0, 0, 0, H * 0.55);
+  grad.addColorStop(0, '#0d0a20');
+  grad.addColorStop(0.5, `hsl(${260 - progress * 20}, ${30 + progress * 20}%, ${12 + progress * 8}%)`);
+  grad.addColorStop(1, `hsl(${25 + progress * 10}, ${60 + progress * 20}%, ${45 + progress * 15}%)`);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H * 0.55);
+
+  // Twinkling stars
+  stars.forEach(s => {
+    s.tw += 0.02;
+    ctx.fillStyle = `rgba(255,255,240,${0.3 + Math.sin(s.tw) * 0.4})`;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Crescent moon
+  ctx.fillStyle = 'rgba(255,250,230,0.9)';
+  ctx.beginPath(); ctx.arc(W * 0.82, H * 0.1, 22, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#0d0a20';
+  ctx.beginPath(); ctx.arc(W * 0.82 + 7, H * 0.1 - 4, 19, 0, Math.PI * 2); ctx.fill();
+}
+
+
+/* ================================================
+   DRAW: KYOTO TEMPLE SILHOUETTES
+   ================================================ */
+function drawTemples(t) {
+  const horizon = H * 0.52;
+
+  temples.forEach(tp => {
+    const cx = W * tp.x;
+
+    if (tp.type === 'pagoda') {
+      const layerH = tp.h / tp.layers;
+      ctx.fillStyle = 'rgba(15,12,30,0.85)';
+
+      for (let i = 0; i < tp.layers; i++) {
+        const y = horizon - (tp.layers - i) * layerH;
+        const topW = 15 + i * 10;
+        const botW = 20 + i * 12;
+
+        // Roof with upturned eaves
+        ctx.beginPath();
+        ctx.moveTo(cx - botW, y + layerH);
+        ctx.lineTo(cx - topW, y + 4);
+        ctx.quadraticCurveTo(cx, y - 4, cx + topW, y + 4);
+        ctx.lineTo(cx + botW, y + layerH);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eave tip curves
+        ctx.strokeStyle = 'rgba(15,12,30,0.85)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx - botW, y + layerH); ctx.quadraticCurveTo(cx - botW - 8, y + layerH - 6, cx - botW - 5, y + layerH - 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(cx + botW, y + layerH); ctx.quadraticCurveTo(cx + botW + 8, y + layerH - 6, cx + botW + 5, y + layerH - 2); ctx.stroke();
+      }
+
+      // Spire on top
+      ctx.fillStyle = 'rgba(15,12,30,0.85)';
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, horizon - tp.h + 5);
+      ctx.lineTo(cx, horizon - tp.h - 15);
+      ctx.lineTo(cx + 2, horizon - tp.h + 5);
+      ctx.fill();
+
+      // Warm glow at base
+      ctx.save();
+      const glow = ctx.createRadialGradient(cx, horizon, 5, cx, horizon, 45);
+      glow.addColorStop(0, 'rgba(217,64,64,0.06)');
+      glow.addColorStop(1, 'transparent');
+      ctx.fillStyle = glow;
+      ctx.fillRect(cx - 45, horizon - 45, 90, 45);
+      ctx.restore();
+
+    } else {
+      // Torii gate
+      ctx.strokeStyle = 'rgba(160,40,40,0.6)';
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(cx - 20, horizon); ctx.lineTo(cx - 18, horizon - tp.h); ctx.moveTo(cx + 20, horizon); ctx.lineTo(cx + 18, horizon - tp.h); ctx.stroke();
+      ctx.lineWidth = 5;
+      ctx.beginPath(); ctx.moveTo(cx - 28, horizon - tp.h); ctx.quadraticCurveTo(cx, horizon - tp.h - 8, cx + 28, horizon - tp.h); ctx.stroke();
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cx - 22, horizon - tp.h + 10); ctx.lineTo(cx + 22, horizon - tp.h + 10); ctx.stroke();
+    }
+  });
+}
+
+
+/* ================================================
+   DRAW: ROAD
+   ================================================ */
+function drawRoad(t) {
+  const roadTop = H * 0.52;
+
+  // Road surface
+  const roadGrad = ctx.createLinearGradient(0, roadTop, 0, H);
+  roadGrad.addColorStop(0, '#3a3a4a');
+  roadGrad.addColorStop(1, '#2a2a3a');
+  ctx.fillStyle = roadGrad;
+  ctx.fillRect(0, roadTop, W, H);
+
+  // Centre lane dashes (scrolling)
+  roadOffset = (roadOffset + speed * 1.5) % 40;
+  ctx.strokeStyle = 'rgba(201,168,76,0.3)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([15, 25]);
+  ctx.lineDashOffset = -roadOffset;
+  ctx.beginPath();
+  ctx.moveTo(W * 0.5, roadTop + 20);
+  ctx.lineTo(W * 0.5, H);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Road edge lines
+  ctx.strokeStyle = 'rgba(201,168,76,0.15)';
+  ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(W * 0.12, roadTop); ctx.lineTo(W * 0.12, H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W * 0.88, roadTop); ctx.lineTo(W * 0.88, H); ctx.stroke();
+}
+
+
+/* ================================================
+   DRAW: BUILDINGS (neon signs + lit windows)
+   ================================================ */
+function drawBuildings(t) {
+  buildings.forEach(b => {
+    const baseX = b.side === 'left' ? -20 : W - b.w + 20;
+    const bx = baseX + (b.side === 'left' ? -1 : 1) * (Math.sin(t * 0.0003 + b.x * 10) * 5);
+    const by = H * 0.52 - b.h + 10;
+
+    // Building body
+    ctx.fillStyle = b.color;
+    ctx.fillRect(bx, by, b.w, b.h);
+
+    // Windows (some lit, some dark)
+    const wS = 6, wG = 14;
+    for (let r = 0; r < b.windows; r++) {
+      for (let c = 0; c < 3; c++) {
+        const wx = bx + 8 + c * wG;
+        const wy = by + 12 + r * wG;
+        const lit = Math.sin(t * 0.001 + r + c + b.x * 5) > -0.3;
+        ctx.fillStyle = lit ? `rgba(255,220,130,${0.5 + Math.sin(t * 0.002 + r) * 0.2})` : 'rgba(20,20,40,0.5)';
+        ctx.fillRect(wx, wy, wS, wS);
+      }
+    }
+
+    // Neon Japanese sign (vertical kanji)
+    if (b.hasSign) {
+      const sY = by + 15;
+      const sX = b.side === 'left' ? bx + b.w - 5 : bx - 5;
+      ctx.save();
+      ctx.fillStyle = b.signColor;
+      ctx.shadowColor = b.signColor;
+      ctx.shadowBlur = 12 + Math.sin(t * 0.003) * 4;
+      ctx.font = "bold 10px 'Shippori Mincho B1', serif";
+      ctx.textAlign = 'center';
+      for (let ci = 0; ci < b.signText.length; ci++) {
+        ctx.fillText(b.signText[ci], sX, sY + ci * 14);
+      }
+      ctx.restore();
+    }
+  });
+}
+
+
+/* ================================================
+   DRAW: SCOOTER + RIDER
+   ================================================ */
+function drawScooter(t) {
+  const sx = W * (0.15 + scooterX * 0.7);
+  const sy = H * 0.78;
+  const bounce = Math.sin(t * 0.008) * 2;
+
+  ctx.save();
+  ctx.translate(sx, sy + bounce);
+
+  // Headlight glow cone
+  ctx.save();
+  const hl = ctx.createRadialGradient(0, -25, 2, 0, -40, 60);
+  hl.addColorStop(0, 'rgba(255,240,180,0.4)');
+  hl.addColorStop(1, 'rgba(255,240,180,0)');
+  ctx.fillStyle = hl;
+  ctx.beginPath(); ctx.ellipse(0, -40, 30, 50, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // Wheel shadows
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath(); ctx.ellipse(-12, 22, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(12, 22, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+  // Wheels
+  ctx.fillStyle = '#222';
+  ctx.beginPath(); ctx.arc(-12, 18, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(12, 18, 9, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#555';
+  ctx.beginPath(); ctx.arc(-12, 18, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(12, 18, 4, 0, Math.PI * 2); ctx.fill();
+
+  // Scooter body (yellow)
+  ctx.fillStyle = '#f5c842';
+  ctx.beginPath();
+  ctx.moveTo(-16, 10);
+  ctx.quadraticCurveTo(-18, -5, -10, -15);
+  ctx.lineTo(10, -15);
+  ctx.quadraticCurveTo(18, -5, 16, 10);
+  ctx.closePath();
+  ctx.fill();
+
+  // Seat
+  ctx.fillStyle = '#8B4513';
+  ctx.fillRect(-14, -2, 28, 8);
+
+  // Handlebars
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.moveTo(-14, -14); ctx.lineTo(-8, -20); ctx.moveTo(14, -14); ctx.lineTo(8, -20); ctx.stroke();
+
+  // Headlight
+  ctx.fillStyle = '#ffe';
+  ctx.shadowColor = 'rgba(255,255,200,0.8)';
+  ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(0, -16, 3, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Rider — body
+  ctx.fillStyle = '#1a1f3a';
+  ctx.beginPath(); ctx.ellipse(0, -20, 10, 12, 0, 0, Math.PI * 2); ctx.fill();
+
+  // Rider — head
+  ctx.fillStyle = '#f0d0b0';
+  ctx.beginPath(); ctx.arc(0, -36, 9, 0, Math.PI * 2); ctx.fill();
+
+  // Rider — hair
+  ctx.fillStyle = '#2a2a3a';
+  ctx.beginPath();
+  ctx.arc(0, -38, 9, Math.PI, Math.PI * 2);
+  ctx.lineTo(9, -36);
+  ctx.quadraticCurveTo(10, -30, 8, -28);
+  ctx.lineTo(-8, -28);
+  ctx.quadraticCurveTo(-10, -30, -9, -36);
+  ctx.closePath();
+  ctx.fill();
+
+  // Rider — pink helmet
+  ctx.fillStyle = '#f4b4c6';
+  ctx.beginPath();
+  ctx.arc(0, -40, 10, Math.PI * 1.1, Math.PI * 1.9);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+
+/* ================================================
+   DRAW: SAKURA PETALS (falling + magnetic collect)
+   ================================================ */
+function spawnSakura() {
+  if (Math.random() < 0.04) {
+    sakuras.push({
+      x: Math.random() * W, y: -20,
+      size: 10 + Math.random() * 12,
+      speed: 0.8 + Math.random() * 1.5,
+      drift: (Math.random() - 0.5) * 0.8,
+      wobble: Math.random() * Math.PI * 2,
+      rot: Math.random() * 360,
+      collected: false,
+      alpha: 0.7 + Math.random() * 0.3,
+      glow: 0
+    });
+  }
+}
+
+function drawSakuras(t) {
+  const sx = W * (0.15 + scooterX * 0.7);
+  const sy = H * 0.78;
+
+  sakuras.forEach(s => {
+    if (s.collected) return;
+
+    // Movement
+    s.y += s.speed;
+    s.x += s.drift + Math.sin(s.wobble) * 0.5;
+    s.wobble += 0.03;
+    s.rot += 1.5;
+
+    const dist = Math.sqrt((s.x - sx) ** 2 + (s.y - sy) ** 2);
+
+    // Proximity glow + magnetic pull when near scooter
+    if (dist < 90) {
+      s.glow = Math.min(1, s.glow + 0.06);
+      s.x += (sx - s.x) * 0.02;
+      s.y += (sy - s.y) * 0.02;
+    } else {
+      s.glow = Math.max(0, s.glow - 0.03);
+    }
+
+    // Collection!
+    if (dist < 55) {
+      s.collected = true;
+      sakuraCount++;
+      document.getElementById('hud-sakura').textContent = sakuraCount;
+      spawnCollectFX(s.x, s.y);
+      // Brief sakura screen flash
+      ctx.save();
+      ctx.fillStyle = 'rgba(244,180,198,0.12)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+      return;
+    }
+
+    // Draw the petal
+    ctx.save();
+    ctx.translate(s.x, s.y);
+    ctx.rotate(s.rot * Math.PI / 180);
+    if (s.glow > 0) { ctx.shadowColor = '#f4b4c6'; ctx.shadowBlur = 18 * s.glow; }
+    ctx.globalAlpha = s.alpha;
+    ctx.fillStyle = s.glow > 0 ? `rgba(255,${180 + s.glow * 60},${200 + s.glow * 40},1)` : '#f4b4c6';
+    ctx.beginPath();
+    ctx.moveTo(0, -s.size / 2);
+    ctx.bezierCurveTo(s.size / 2, -s.size / 2, s.size / 2, s.size / 4, 0, s.size / 2);
+    ctx.bezierCurveTo(-s.size / 2, s.size / 4, -s.size / 2, -s.size / 2, 0, -s.size / 2);
+    ctx.fill();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  });
+
+  sakuras = sakuras.filter(s => !s.collected && s.y < H + 30);
+}
+
+
+/* ================================================
+   GAME LOOP
+   ================================================ */
+function gameLoop(ts) {
+  if (!gameRunning) return;
+  if (!gameStartTime) gameStartTime = ts;
+  const t = ts;
+
+  // Scooter steering (smooth lerp)
+  if (moveLeft)  targetX = Math.max(0, targetX - 0.025);
+  if (moveRight) targetX = Math.min(1, targetX + 0.025);
+  scooterX += (targetX - scooterX) * 0.12;
+
+  // Distance + speed
+  distance += speed * 0.15;
+  speed = 3 + (distance / RIDE_DISTANCE) * 2;
+
+  // Update HUD
+  document.getElementById('hud-dist').textContent = Math.floor(distance) + 'm';
+  const speedEmojis = ['🛵', '🛵💨', '🛵💨💨'];
+  document.getElementById('hud-speed').textContent = speedEmojis[Math.min(2, Math.floor(speed / 2.5))];
+
+  // Spawn things
+  spawnSakura();
+
+  // Draw everything (back to front)
+  ctx.clearRect(0, 0, W, H);
+  drawSky(t);
+  drawTemples(t);
+  drawBuildings(t);
+  drawRoad(t);
+  drawSakuras(t);
+  drawScooter(t);
+  drawFX();
+
+  // Check if ride is complete
+  if (distance >= RIDE_DISTANCE) {
+    gameRunning = false;
+    setTimeout(showArrival, 600);
+    return;
+  }
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+/* ================================================
+   SCREEN TRANSITIONS
+   ================================================ */
+
+// Welcome → Game
+function startGame() {
+  // Unlock AudioContext on this user gesture (critical for iPhone)
+  ensureAudioCtx();
+
+  document.getElementById('welcome').classList.add('hidden');
+  setTimeout(() => {
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('musicBtn').style.display = 'block';
+    initScene();
+    gameRunning = true;
+
+    // Try to enable tilt controls on mobile
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      DeviceOrientationEvent.requestPermission().then(r => {
+        if (r === 'granted') { tiltEnabled = true; window.addEventListener('deviceorientation', handleOrientation); }
+      }).catch(() => {});
+    } else if ('DeviceOrientationEvent' in window) {
+      tiltEnabled = true;
+      window.addEventListener('deviceorientation', handleOrientation);
+    }
+
+    requestAnimationFrame(gameLoop);
+  }, 900);
+}
+
+// Game → Arrival
+function showArrival() {
+  document.getElementById('game-screen').classList.add('hidden');
+  musicPlaying = false;
+  document.getElementById('arrival-screen').classList.remove('hidden');
+}
+
+// Arrival → Gift Reveal
+function showReveal() {
+  document.getElementById('arrival-screen').classList.add('hidden');
+
+  // Floating gold + sakura particles
+  const cont = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'reveal-particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.width = (3 + Math.random() * 5) + 'px';
+    p.style.height = p.style.width;
+    p.style.animationDelay = (Math.random() * 3) + 's';
+    p.style.animationDuration = (2 + Math.random() * 3) + 's';
+    if (Math.random() > 0.5) p.style.background = 'var(--sakura)';
+    cont.appendChild(p);
+  }
+
+  setTimeout(() => document.getElementById('reveal-screen').classList.remove('hidden'), 300);
+}
+</script>
+</body>
+</html>
